@@ -158,4 +158,82 @@ const regexTests = [
   }
 ];
 
+const regexAdvancedTests = [
+  {
+    description: "Escaped backslash and quotes",
+    rule: `commandline =~ "C:\\\\Windows\\\\System32\\\\cmd\\.exe"`,
+    alert: { commandline: 'C:\\Windows\\System32\\cmd.exe' },
+    expected: true
+  },
+  {
+    description: "Alternation (OR within regex)",
+    rule: `commandline =~ "mimikatz|procdump"`,
+    alert: { commandline: "cmd /c procdump.exe" },
+    expected: true
+  },
+  {
+    description: "Alternation fails when not matched",
+    rule: `commandline =~ "mimikatz|procdump"`,
+    alert: { commandline: "cmd /c net.exe" },
+    expected: false
+  },
+  {
+    description: "Multiple matches with OR group and special char",
+    rule: `log =~ "(ERROR|WARN):\\s+.*"`,
+    alert: { log: "ERROR: Failed to load config" },
+    expected: true
+  },
+  {
+    description: "Special characters: $, ^, +",
+    rule: `log =~ "^\\$USER\\+logged\\s+in$"`,
+    alert: { log: "$USER+logged in" },
+    expected: true
+  },
+  {
+    description: "Case-sensitive fail (no match)",
+    rule: `process =~ "PowerShell"` ,
+    alert: { process: "powershell.exe" },
+    expected: false
+  },
+  {
+    description: "Long multiline input (simulate log match)",
+    rule: `log =~ "connect\\sattempt.*denied"`,
+    alert: { log: "connect attempt to database\nconnection denied by firewall" },
+    expected: true
+  },
+  {
+    description: "Unicode matching",
+    rule: `message =~ "用户.*登录"` ,
+    alert: { message: "用户 admin 登录成功" },
+    expected: true
+  },
+  {
+    description: "Bracket literal match",
+    rule: `filename =~ "\\[confidential\\]_report\\.pdf"`,
+    alert: { filename: "[confidential]_report.pdf" },
+    expected: true
+  },
+  {
+    description: "IP match with non-capturing group (if supported)",
+    rule: `source_ip =~ "^(?:10|192\\.168)\\..*"`,
+    alert: { source_ip: "192.168.1.15" },
+    expected: true
+  },
+  {
+    description: "Lookahead (if supported) — ensure port follows IP",
+    rule: `connection =~ "192\\.168\\.1\\.1(?=:\\d+)"`,
+    alert: { connection: "192.168.1.1:8080" },
+    expected: true
+  },
+  {
+    description: "Lookbehind not supported (expected false)",
+    rule: `path =~ "(?<=C:)\\\\Windows"`,
+    alert: { path: "C:\\Windows\\System32" },
+    expected: false
+  },
+];
+
+module.exports = regexAdvancedTests;
+
+
 module.exports = tests;
