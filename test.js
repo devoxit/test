@@ -77,4 +77,85 @@ const tests = [
   }
 ];
 
+const regexTests = [
+  {
+    description: "Match beginning of string",
+    rule: `commandline =~ "^cmd"`,
+    alert: { commandline: "cmd /c whoami" },
+    expected: true
+  },
+  {
+    description: "Match end of string",
+    rule: `filename =~ ".exe$"`,
+    alert: { filename: "mimikatz.exe" },
+    expected: true
+  },
+  {
+    description: "Dot wildcard matching",
+    rule: `commandline =~ "mimi.katz"`,
+    alert: { commandline: "mimi-katz" },
+    expected: true
+  },
+  {
+    description: "Optional group match",
+    rule: `commandline =~ "mimikatz(\\.exe)?"`,
+    alert: { commandline: "mimikatz.exe" },
+    expected: true
+  },
+  {
+    description: "Negated match with !~",
+    rule: `process !~ "powershell"`,
+    alert: { process: "cmd.exe" },
+    expected: true
+  },
+  {
+    description: "Match with escaped dot",
+    rule: `filename =~ "secret\\.txt"`,
+    alert: { filename: "secret.txt" },
+    expected: true
+  },
+  {
+    description: "Word boundary match",
+    rule: `commandline =~ "\\bmimikatz\\b"`,
+    alert: { commandline: "run mimikatz now" },
+    expected: true
+  },
+  {
+    description: "Regex case-sensitive match fails",
+    rule: `commandline =~ "Mimikatz"`,
+    alert: { commandline: "mimikatz" },
+    expected: false
+  },
+  {
+    description: "Complex regex with multiple patterns",
+    rule: `commandline =~ "cmd.*(/c|/k).*mimikatz.*\\.exe"` ,
+    alert: { commandline: "cmd /c start mimikatz.exe" },
+    expected: true
+  },
+  {
+    description: "Regex fail with unmatched pattern",
+    rule: `commandline =~ "powershell.*Invoke-Expression"`,
+    alert: { commandline: "cmd /c mimikatz.exe" },
+    expected: false
+  },
+  {
+    description: "Regex with multiple spaces",
+    rule: `log =~ "failed\\s+to\\s+connect"`,
+    alert: { log: "failed    to connect to server" },
+    expected: true
+  },
+  {
+    description: "Regex with character class",
+    rule: `ip =~ "^192\\.168\\.[0-9]{1,3}\\.[0-9]{1,3}$"`,
+    alert: { ip: "192.168.0.1" },
+    expected: true
+  },
+  {
+    description: "Negated regex fails on match",
+    rule: `commandline !~ "mimikatz"`,
+    alert: { commandline: "mimikatz.exe" },
+    expected: false
+  }
+];
+
 module.exports = tests;
