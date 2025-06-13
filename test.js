@@ -45,3 +45,34 @@ function hexToHSL(H) {
   }
   return { h, s: Math.round(s * 100), l: Math.round(l * 100) };
 }
+function getColor(severity, score) {
+  const baseColors = {
+    low: '#A8D5BA',
+    moderate: '#FFE28A',
+    medium: '#FFB347',
+    high: '#FF6F61',
+    critical: '#8E44AD' // Updated to purple
+  };
+
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  score = clamp(score, 0, 100);
+
+  // Darken the color by blending with black
+  const darken = (hex, amount) => {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+
+    r = Math.floor(r * (1 - amount));
+    g = Math.floor(g * (1 - amount));
+    b = Math.floor(b * (1 - amount));
+
+    return `#${r.toString(16).padStart(2, '0')}${g
+      .toString(16)
+      .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  };
+
+  const baseHex = baseColors[severity.toLowerCase()];
+  const darkness = score / 100; // 0 (no darken) to 1 (full darken)
+  return darken(baseHex, darkness * 0.5); // up to 50% darker
+}
